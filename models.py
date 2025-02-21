@@ -4,9 +4,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
+
 class Todo(db.Model):
   id = db.Column(db.Integer, primary_key=True)
-  user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  #set userid as a foreign key to user.id
+  user_id = db.Column(db.Integer, db.ForeignKey('user.id'),
+                      nullable=False)  #set userid as a foreign key to user.id
   text = db.Column(db.String(255), nullable=False)
   done = db.Column(db.Boolean, default=False)
 
@@ -38,8 +40,12 @@ class TodoCategory(db.Model):
   __tablename__ = 'todo_category'
   id = db.Column(db.Integer, primary_key=True)
   todo_id = db.Column(db.Integer, db.ForeignKey('todo.id'), nullable=False)
-  category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
-  last_modified = db.Column(db.DateTime, default=func.now(), onupdate=func.now())
+  category_id = db.Column(db.Integer,
+                          db.ForeignKey('category.id'),
+                          nullable=False)
+  last_modified = db.Column(db.DateTime,
+                            default=func.now(),
+                            onupdate=func.now())
 
   def __repr__(self):
     return f'<TodoCategory last modified {self.last_modified.strftime("%Y/%m/%d, %H:%M:%S")}>'
@@ -49,8 +55,11 @@ class Category(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
   text = db.Column(db.String(255), nullable=False)
-  user = db.relationship('RegularUser', backref=db.backref('categories', lazy='joined'))
-  todos = db.relationship('Todo', secondary='todo_category', backref=db.backref('categories', lazy=True))
+  user = db.relationship('RegularUser',
+                         backref=db.backref('categories', lazy='joined'))
+  todos = db.relationship('Todo',
+                          secondary='todo_category',
+                          backref=db.backref('categories', lazy=True))
 
   def __init__(self, user_id, text):
     self.user_id = user_id
@@ -67,10 +76,7 @@ class User(db.Model):
   email = db.Column(db.String(120), unique=True, nullable=False)
   password = db.Column(db.String(120), nullable=False)
   type = db.Column(db.String(50))
-  __mapper_args__ = {
-      'polymorphic_identity': 'user',
-      'polymorphic_on': type
-  }
+  __mapper_args__ = {'polymorphic_identity': 'user', 'polymorphic_on': type}
 
   def __init__(self, username, email, password):
     self.username = username
@@ -99,7 +105,9 @@ class User(db.Model):
 
 class RegularUser(User):
   __tablename__ = 'regular_user'
-  todos = db.relationship('Todo', backref='user', lazy=True)  # sets up a relationship to todos which references User
+  todos = db.relationship(
+      'Todo', backref='user',
+      lazy=True)  # sets up a relationship to todos which references User
   __mapper_args__ = {
       'polymorphic_identity': 'regular user',
   }
